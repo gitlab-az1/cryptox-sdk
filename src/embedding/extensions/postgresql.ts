@@ -1,3 +1,4 @@
+import math from 'typesdk/math';
 import type { Dict } from 'typesdk/types';
 import { Database } from 'typesdk/database/postgres';
 import { assertString } from 'typesdk/utils/assertions';
@@ -5,7 +6,7 @@ import { assertString } from 'typesdk/utils/assertions';
 import { Embedding } from '../_internals/_config';
 import { Exception } from '../../errors/Exception';
 import { MultidimensionalVector } from '../vectors/multidimensional';
-import { calculateCosineSimilarityForNumericArrays } from '../../resources/math';
+import { calculateCosineSimilarityFromNumericArrays } from '../../resources/math';
 import { LegacyWordEmbedding, type LegacyWordEmbeddingOptions } from '../LegacyWordEmbedding';
 
 
@@ -15,7 +16,7 @@ let database: Database | null = null;
 
 export type PostgresEmbeddingTextWorkerLegacyOptions = {
   driver: 'legacy';
-  options: LegacyWordEmbeddingOptions;
+  options?: LegacyWordEmbeddingOptions;
 }
 
 export type PostgresEmbeddingTextWorkerOptions = PostgresEmbeddingTextWorkerLegacyOptions;
@@ -27,17 +28,35 @@ export type PostgresEmbeddingExtensionOptions = {
   embeddingOptions: PostgresEmbeddingTextWorkerOptions;
 }
 
-export interface DatabaseSchema {
-  [key: string]: Dict<string | number | boolean | any[] | NonNullable<Record<string | number | symbol, any>>>
+export interface DatabaseSchema extends Record<string, Dict<string | number | boolean | any[] | NonNullable<Record<string | number | symbol, any>>>> {} 
+
+export type LookupResults<Schema extends DatabaseSchema, Row extends keyof Schema> = {
+  [Column in keyof Schema[Row]]: Schema[Row][Column];
+} & {
+  readonly $cosine_similarity: number;
+  readonly embedding: readonly number[];
 }
 
 export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = DatabaseSchema> {
   #embedding: Embedding | null = null;
   #db: Database | null = null;
 
-  constructor(
-    private readonly _options: PostgresEmbeddingExtensionOptions // eslint-disable-line comma-dangle
-  ) { }
+  private readonly _options: PostgresEmbeddingExtensionOptions;
+
+  constructor(options: PostgresEmbeddingExtensionOptions) {
+    this._options = options;
+
+    try {
+      new URL(this._options.connectionString);
+    } catch (err: any) {
+      throw new Exception(`Malformed connection string: ${this._options.connectionString}`,
+        err.message ?? err);
+    }
+
+    if(!process.env.POSTGRES_DB) {
+      process.env.POSTGRES_DB = new URL(this._options.connectionString).pathname.slice(1);
+    }
+  }
 
   async #insertEmbeddingData<K extends keyof Schema>(table: K, data: Schema[K]): Promise<Schema[K]> {
     assertString(table);
@@ -171,7 +190,7 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
     return (await embedding.embed(value));
   }
 
-  async #lookupEmbeddingData<K extends keyof Schema>(table: K, threshold: number, data: Dict<string | number | boolean | any[] | NonNullable<Record<string | number | symbol, any>>>): Promise<Schema[K][]> {
+  async #lookupEmbeddingData<K extends keyof Schema>(table: K, threshold: number, data: Dict<string | number | boolean | any[] | NonNullable<Record<string | number | symbol, any>>>): Promise<LookupResults<Schema, K>[]> {
     assertString(table);
 
     if(!/^[a-zA-Z_]+$/.test(table)) {
@@ -185,8 +204,10 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
         'The table prefix you provided contains characters that can be used for SQL injection. Please use only alphanumeric characters and underscores.');
     }
 
-    if(threshold < 0 || threshold > 1) {
-      throw new TypeError(`Threshold must be between 0 and 1, inclusive. Received ${threshold}`);
+    const c = new math.Comparator();
+
+    if(!c.isBetween(threshold, 0, 1, true)) {
+      console.warn(`Threshold value '${threshold}' is out of range [0, 1]. It can take down the search accuracy or even not found any results`);
     }
 
     const searchVector = await this.#createEmbeddingVector(data);
@@ -196,7 +217,7 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
       const results = await database.query(`SELECT * FROM ${this._options.tablePrefix ?? ''}${table}`);
       const rows = results.rows.map(item => ({
         ...item,
-        $cosine_similarity: calculateCosineSimilarityForNumericArrays(searchVector.toArray(),
+        $cosine_similarity: calculateCosineSimilarityFromNumericArrays(searchVector.toArray(),
           item.embedding),
       }));
 
@@ -208,7 +229,7 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
     }
   }
 
-  public lookup<K extends keyof Schema>(table: K, threshold: number, data: Dict<string | number | boolean | any[] | NonNullable<Record<string | number | symbol, any>>>): Promise<Schema[K][]> {
+  public lookup<K extends keyof Schema>(table: K, threshold: number, data: Dict<string | number | boolean | any[] | NonNullable<Record<string | number | symbol, any>>>): Promise<LookupResults<Schema, K>[]> {
     return this.#lookupEmbeddingData<K>(table, threshold, data);
   }
 
@@ -231,6 +252,10 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
 
   async #connect(): Promise<Database> {
     let output: Database;
+
+    if(this._options.forceProduction) {
+      process.env.NODE_ENV = 'production';
+    }
 
     if(process.env.NODE_ENV === 'production' ||
       this._options.forceProduction === true) {

@@ -43,7 +43,7 @@ export function calculateCosineSimilarityForMultidimensionalVectorInstances(a: M
  * @param {number[]} b The array to compare with.
  * @returns {number} The cosine similarity between the two arrays.
  */
-export function calculateCosineSimilarityForNumericArrays(a: number[] | readonly number[], b: number[] | readonly number[]): number {
+export function calculateCosineSimilarityFromNumericArrays(a: number[] | readonly number[], b: number[] | readonly number[]): number {
   if(!Array.isArray(a)) {
     throw new TypeError(`Expected argument $0 to be an array, but got ${typeof a}`);
   }

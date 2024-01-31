@@ -6,6 +6,7 @@ import { Embedding } from '../_internals/_config';
 import { Exception } from '../../errors/Exception';
 import { MultidimensionalVector } from '../vectors/multidimensional';
 import { LegacyWordEmbedding, type LegacyWordEmbeddingOptions } from '../LegacyWordEmbedding';
+import { calculateCosineSimilarityForNumericArrays } from 'src/resources/math';
 
 
 
@@ -188,17 +189,20 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
       throw new TypeError(`Threshold must be between 0 and 1, inclusive. Received ${threshold}`);
     }
 
+    const searchVector = await this.#createEmbeddingVector(data);
     const database = await this.#connect();
 
     try {
-      const results = await database.query(`SELECT * FROM ${this._options.tablePrefix ?? ''}${table} WHERE embedding <-> $1 < $2`, {
-        values: [
-          (await this.#createEmbeddingVector(data)).toArray(),
-          threshold,
-        ],
-      });
+      const results = await database.query(`SELECT * FROM ${this._options.tablePrefix ?? ''}${table}`);
+      const rows = results.rows.map(item => ({
+        ...item,
+        $cosine_similarity: calculateCosineSimilarityForNumericArrays(searchVector.toArray(),
+          item.embedding),
+      }));
 
-      return results.rows;
+      return rows.filter(item => {
+        return item.$cosine_similarity >= threshold;
+      });
     } finally {
       await database.close();
     }

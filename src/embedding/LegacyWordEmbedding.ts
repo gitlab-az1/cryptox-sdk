@@ -1,6 +1,7 @@
 import math from 'typesdk/math';
 import { crc32 } from 'typesdk/algorithms/crc32';
 
+import { Embedding } from './_internals/_config';
 import { MultidimensionalVector } from './vectors';
 
 
@@ -22,6 +23,7 @@ export type LegacyWordEmbeddingOptions = {
 
 
 const DEFAULT_OPTIONS: LegacyWordEmbeddingOptions = {
+  inputToVectorEncoding: 'plain',
   normalize: true,
   negativateRange: {
     min: 0.26,
@@ -32,14 +34,14 @@ const DEFAULT_OPTIONS: LegacyWordEmbeddingOptions = {
   vectorScale: 1,
 };
 
-export class LegacyWordEmbedding {
+export class LegacyWordEmbedding implements Embedding {
   private readonly _options: LegacyWordEmbeddingOptions;
 
   constructor(options?: LegacyWordEmbeddingOptions) {
     this._options = Object.assign({}, DEFAULT_OPTIONS, options);
   }
 
-  private _tokenize(text: string): string[] {
+  #tokenize(text: string): string[] {
     if(typeof this._options.caseSensitive === 'boolean' && !this._options.caseSensitive) {
       text = text.toLowerCase();
     }
@@ -66,7 +68,7 @@ export class LegacyWordEmbedding {
     return text.split(' ').map(item => item.trim()).filter(Boolean);
   }
 
-  private _mapWords(words: string[]): number[] {
+  #mapWords(words: string[]): number[] {
     const output = [] as number[];
 
     for(let i = 0; i < words.length; i++) {
@@ -85,8 +87,7 @@ export class LegacyWordEmbedding {
             value = crc32(Buffer.from([char]));
             break;
           default:
-            value = char / math.log(i + 2);
-            break;
+            throw new Error(`Unknown inputToVectorEncoding: ${this._options.inputToVectorEncoding}`);
         }
 
         output.push(value);
@@ -97,8 +98,8 @@ export class LegacyWordEmbedding {
   }
 
   public embed(text: string): MultidimensionalVector {
-    const words = this._tokenize(text);
-    const bytes = this._mapWords(words);
+    const words = this.#tokenize(text);
+    const bytes = this.#mapWords(words);
 
     let vector = new MultidimensionalVector(...bytes);
 

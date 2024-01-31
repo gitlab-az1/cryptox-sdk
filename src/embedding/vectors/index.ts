@@ -12,7 +12,7 @@ export {
 
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
-namespace vectors { /* eslint-disable @typescript-eslint/no-var-requires */
+export namespace vectors { /* eslint-disable @typescript-eslint/no-var-requires */
   export const Vector2D: typeof import('./2d').Vector2D = require('./2d').Vector2D;
   export const Vector3D: typeof import('./3d').Vector3D = require('./3d').Vector3D;
   export const MultidimensionalVector: typeof import('./multidimensional').MultidimensionalVector = require('./multidimensional').MultidimensionalVector;

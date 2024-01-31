@@ -86,7 +86,7 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
     try {
       const results = await database.query(query, {
         values: [
-          this.#createEmbeddingVector(data),
+          (await this.#createEmbeddingVector(data)).toArray(),
           ...Object.values(data),
         ],
       });
@@ -149,7 +149,7 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
     try {
       await database.query(query, {
         values: [
-          this.#createEmbeddingVector(data),
+          (await this.#createEmbeddingVector(data)).toArray(),
           ...Object.values(data),
           whereValue,
         ],
@@ -193,7 +193,7 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
     try {
       const results = await database.query(`SELECT * FROM ${this._options.tablePrefix ?? ''}${table} WHERE embedding <-> $1 < $2`, {
         values: [
-          await this.#createEmbeddingVector(data),
+          (await this.#createEmbeddingVector(data)).toArray(),
           threshold,
         ],
       });

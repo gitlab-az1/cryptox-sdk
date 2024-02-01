@@ -42,7 +42,7 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
   #embedding: Embedding | null = null;
   #db: Database | null = null;
 
-  private readonly _options: PostgresEmbeddingExtensionOptions;
+  private _options: PostgresEmbeddingExtensionOptions;
 
   constructor(options: PostgresEmbeddingExtensionOptions) {
     this._options = options;

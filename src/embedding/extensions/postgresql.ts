@@ -61,7 +61,10 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
     if(!!this._options.tablePrefix &&
       this._options.formatTablePrefix !== false) {
       const prefix = this._options.tablePrefix.trim();
-      this._options.tablePrefix = prefix.endsWith('_') ? prefix : `${prefix}_`;
+
+      this._options = Object.assign({}, this._options, {
+        tablePrefix: prefix.endsWith('_') ? prefix : `${prefix}_`,
+      });
     }
   }
 

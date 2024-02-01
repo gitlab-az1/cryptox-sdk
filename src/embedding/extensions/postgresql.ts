@@ -195,7 +195,7 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
 
   async #createEmbeddingVector(data: Dict<string | number | boolean | any[] | NonNullable<Record<string | number | symbol, any>>>): Promise<MultidimensionalVector> {
     const embedding = this.#getEmbedding();
-    const value = Object.values(data).map(String).join(' ');
+    const value = Object.values(data).filter(Boolean).map(String).join(' ');
 
     return (await embedding.embed(value));
   }
@@ -241,9 +241,9 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
     }
   }
 
-  public lookup<K extends keyof Schema>(table: K, data: Dict<string | number | boolean | any[] | NonNullable<Record<string | number | symbol, any>>>): Promise<LookupResults<Schema, K>[]>;
-  public lookup<K extends keyof Schema>(table: K, threshold: number, data: Dict<string | number | boolean | any[] | NonNullable<Record<string | number | symbol, any>>>): Promise<LookupResults<Schema, K>[]>;
-  public lookup<K extends keyof Schema>(table: K, thresholdOrData: number | Dict<string | number | boolean | any[] | NonNullable<Record<string | number | symbol, any>>>, data?: Dict<string | number | boolean | any[] | NonNullable<Record<string | number | symbol, any>>>): Promise<LookupResults<Schema, K>[]> {
+  public lookup<K extends keyof Schema>(table: K, data: Schema[K]): Promise<LookupResults<Schema, K>[]>;
+  public lookup<K extends keyof Schema>(table: K, threshold: number, data: Schema[K]): Promise<LookupResults<Schema, K>[]>;
+  public lookup<K extends keyof Schema>(table: K, thresholdOrData: number | Schema[K], data?: Schema[K]): Promise<LookupResults<Schema, K>[]> {
 
     return this.#lookupEmbeddingData<K>(table,
       typeof thresholdOrData === 'object' ? thresholdOrData : data!,

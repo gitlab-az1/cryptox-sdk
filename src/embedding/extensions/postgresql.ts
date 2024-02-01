@@ -25,6 +25,7 @@ export type PostgresEmbeddingExtensionOptions = {
   tablePrefix?: string;
   forceProduction?: boolean;
   connectionString: string;
+  formatTablePrefix?: boolean;
   embeddingOptions: PostgresEmbeddingTextWorkerOptions;
 }
 
@@ -55,6 +56,12 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
 
     if(!process.env.POSTGRES_DB) {
       process.env.POSTGRES_DB = new URL(this._options.connectionString).pathname.slice(1);
+    }
+
+    if(!!this._options.tablePrefix &&
+      this._options.formatTablePrefix !== false) {
+      const prefix = this._options.tablePrefix.trim();
+      this._options.tablePrefix = prefix.endsWith('_') ? prefix : `${prefix}_`;
     }
   }
 

@@ -1,4 +1,4 @@
-# CryptoX SDK
+# CryptX SDK
 
 
 ## Modules Overview

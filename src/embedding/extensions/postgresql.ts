@@ -190,7 +190,7 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
     return (await embedding.embed(value));
   }
 
-  async #lookupEmbeddingData<K extends keyof Schema>(table: K, threshold: number, data: Dict<string | number | boolean | any[] | NonNullable<Record<string | number | symbol, any>>>): Promise<LookupResults<Schema, K>[]> {
+  async #lookupEmbeddingData<K extends keyof Schema>(table: K, data: Dict<string | number | boolean | any[] | NonNullable<Record<string | number | symbol, any>>>, threshold?: number): Promise<LookupResults<Schema, K>[]> {
     assertString(table);
 
     if(!/^[a-zA-Z_]+$/.test(table)) {
@@ -206,7 +206,7 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
 
     const c = new math.Comparator();
 
-    if(!c.isBetween(threshold, 0, 1, true)) {
+    if(!!threshold && !c.isBetween(threshold, 0, 1, true)) {
       console.warn(`Threshold value '${threshold}' is out of range [0, 1]. It can take down the search accuracy or even not found any results`);
     }
 
@@ -221,6 +221,8 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
           item.embedding),
       }));
 
+      if(!threshold) return rows;
+
       return rows.filter(item => {
         return item.$cosine_similarity >= threshold;
       });
@@ -229,8 +231,13 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
     }
   }
 
-  public lookup<K extends keyof Schema>(table: K, threshold: number, data: Dict<string | number | boolean | any[] | NonNullable<Record<string | number | symbol, any>>>): Promise<LookupResults<Schema, K>[]> {
-    return this.#lookupEmbeddingData<K>(table, threshold, data);
+  public lookup<K extends keyof Schema>(table: K, data: Dict<string | number | boolean | any[] | NonNullable<Record<string | number | symbol, any>>>): Promise<LookupResults<Schema, K>[]>;
+  public lookup<K extends keyof Schema>(table: K, threshold: number, data: Dict<string | number | boolean | any[] | NonNullable<Record<string | number | symbol, any>>>): Promise<LookupResults<Schema, K>[]>;
+  public lookup<K extends keyof Schema>(table: K, thresholdOrData: number | Dict<string | number | boolean | any[] | NonNullable<Record<string | number | symbol, any>>>, data?: Dict<string | number | boolean | any[] | NonNullable<Record<string | number | symbol, any>>>): Promise<LookupResults<Schema, K>[]> {
+
+    return this.#lookupEmbeddingData<K>(table,
+      typeof thresholdOrData === 'object' ? thresholdOrData : data!,
+      typeof thresholdOrData === 'number' ? thresholdOrData : undefined);
   }
 
   #getEmbedding(): Embedding {

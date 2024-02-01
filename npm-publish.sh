@@ -17,7 +17,7 @@ mkdir ./__build__/
 
 clear
 
-git clone https://github.com/gitlab-az1/cryptox-sdk.git ./__build__/
+git clone https://github.com/gitlab-az1/cryptx-sdk.git ./__build__/
 
 cd ./__build__/
 

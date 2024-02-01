@@ -81,7 +81,7 @@ export class LegacyWordEmbedding implements Embedding {
             value = char;
             break;
           case 'tfidf':
-            value = char / math.log(i + 2);
+            value = char / math.log(j + 2);
             break;
           case 'crc32':
             value = crc32(Buffer.from([char]));

@@ -12,6 +12,7 @@ export type LegacyWordEmbeddingOptions = {
   stopWords?: string[];
   ignoreNumeric?: boolean;
   ignoreNonAlpha?: boolean;
+  strictIgnoreNonAlpha?: boolean;
   negativateRange?: {
     min: number;
     max: number;
@@ -56,8 +57,9 @@ export class LegacyWordEmbedding implements Embedding {
       text = text.replace(/\d+/g, '');
     }
 
-    if(this._options.ignoreNonAlpha) {
-      text = text.replace(/[^a-z\s]/g, '');
+    if(this._options.ignoreNonAlpha || this._options.strictIgnoreNonAlpha) {
+      const regexp = this._options.strictIgnoreNonAlpha === true ? /[^a-z\s]/g : /[^a-z\d\s]/g;
+      text = text.replace(regexp, '');
     }
 
     if(this._options.ignoreStopWords) {

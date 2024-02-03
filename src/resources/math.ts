@@ -63,8 +63,8 @@ export function calculateCosineSimilarityFromNumericArrays(a: number[] | readonl
 
   // Ensure both vectors have the same length by padding with zeros if needed
   const maxLength = math.max(a.length, b.length);
-  const paddedVector1 = [...a, ...Array(maxLength - a.length).fill(0)];
-  const paddedVector2 = [...b, ...Array(maxLength - b.length).fill(0)];
+  const paddedVector1 = [...a, ...Array(maxLength - a.length).fill(0)] as number[];
+  const paddedVector2 = [...b, ...Array(maxLength - b.length).fill(0)] as number[];
 
   // Calculate dot product
   const dotProduct = paddedVector1.reduce((acc, value, index) => (acc + (value * paddedVector2[index])), 0);

@@ -14,13 +14,23 @@ import { LegacyWordEmbedding, type LegacyWordEmbeddingOptions } from '../LegacyW
 let database: Database | null = null;
 
 
+/**
+ * Represents the options for creating a legacy PostgresEmbeddingTextWorker.
+ */
 export type PostgresEmbeddingTextWorkerLegacyOptions = {
   driver: 'legacy';
   options?: LegacyWordEmbeddingOptions;
 }
 
+/**
+ * Represents the options for creating a PostgresEmbeddingTextWorker.
+ */
 export type PostgresEmbeddingTextWorkerOptions = PostgresEmbeddingTextWorkerLegacyOptions;
 
+
+/**
+ * Represents the options for configuring a PostgresEmbeddingExtension.
+ */
 export type PostgresEmbeddingExtensionOptions = {
   tablePrefix?: string;
   forceProduction?: boolean;
@@ -29,8 +39,14 @@ export type PostgresEmbeddingExtensionOptions = {
   embeddingOptions: PostgresEmbeddingTextWorkerOptions;
 }
 
+/**
+ * Represents the schema of a database, where each table name is mapped to its column names and types.
+ */
 export interface DatabaseSchema extends Record<string, Dict<string | number | boolean | any[] | NonNullable<Record<string | number | symbol, any>>>> {} 
 
+/**
+ * Represents the results of a database lookup operation, including the matched data and cosine similarity.
+ */
 export type LookupResults<Schema extends DatabaseSchema, Row extends keyof Schema> = {
   [Column in keyof Schema[Row]]: Schema[Row][Column];
 } & {
@@ -38,12 +54,19 @@ export type LookupResults<Schema extends DatabaseSchema, Row extends keyof Schem
   readonly embedding: readonly number[];
 }
 
+/**
+ * Represents a PostgreSQL database extension for handling embeddings.
+ */
 export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = DatabaseSchema> {
   #embedding: Embedding | null = null;
   #db: Database | null = null;
 
   private _options: PostgresEmbeddingExtensionOptions;
 
+  /**
+   * Constructs a new PostgresEmbeddingExtension instance with the specified options.
+   * @param options - The options to configure the extension.
+   */
   constructor(options: PostgresEmbeddingExtensionOptions) {
     this._options = options;
 
@@ -127,6 +150,13 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
     }
   }
 
+  /**
+   * Inserts data into the specified table of the database.
+   * 
+   * @param table - The name of the table to insert data into.
+   * @param data - The data to insert into the table.
+   * @returns A Promise resolving to the inserted data.
+   */
   public insert<K extends keyof Schema>(table: K, data: Schema[K]): Promise<Schema[K]> {
     return this.#insertEmbeddingData<K>(table, data);
   }
@@ -189,6 +219,14 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
     }
   }
 
+  /**
+   * Updates data in the specified table of the database based on the provided conditions.
+   * 
+   * @param table - The name of the table to update data in.
+   * @param data - The data to update in the table.
+   * @param where - The conditions to apply for updating data.
+   * @returns A Promise resolving when the update operation is complete.
+   */
   public update<K extends keyof Schema>(table: K, data: Schema[K], where: Dict<string>): Promise<void> {
     return this.#updateEmbeddingData<K>(table, data, where);
   }
@@ -232,17 +270,41 @@ export class PostgresEmbeddingExtension<Schema extends DatabaseSchema = Database
       }));
 
       if(!threshold) return rows;
-
-      return rows.filter(item => {
-        return item.$cosine_similarity >= threshold;
-      });
+      return rows.filter(item => item.$cosine_similarity >= threshold);
     } finally {
       await database.close();
     }
   }
 
+
+  /**
+   * Looks up data in the specified table of the database based on the provided criteria.
+   * 
+   * @param table - The name of the table to search.
+   * @param thresholdOrData - The similarity threshold or the data to search for.
+   * @param data - The data to search for (if the threshold is provided).
+   * @returns A Promise resolving to an array of lookup results.
+   */
   public lookup<K extends keyof Schema>(table: K, data: Schema[K]): Promise<LookupResults<Schema, K>[]>;
+
+  /**
+   * Looks up data in the specified table of the database based on the provided criteria.
+   * 
+   * @param table - The name of the table to search.
+   * @param thresholdOrData - The similarity threshold or the data to search for.
+   * @param data - The data to search for (if the threshold is provided).
+   * @returns A Promise resolving to an array of lookup results.
+   */
   public lookup<K extends keyof Schema>(table: K, threshold: number, data: Schema[K]): Promise<LookupResults<Schema, K>[]>;
+
+  /**
+   * Looks up data in the specified table of the database based on the provided criteria.
+   * 
+   * @param table - The name of the table to search.
+   * @param thresholdOrData - The similarity threshold or the data to search for.
+   * @param data - The data to search for (if the threshold is provided).
+   * @returns A Promise resolving to an array of lookup results.
+   */
   public lookup<K extends keyof Schema>(table: K, thresholdOrData: number | Schema[K], data?: Schema[K]): Promise<LookupResults<Schema, K>[]> {
 
     return this.#lookupEmbeddingData<K>(table,

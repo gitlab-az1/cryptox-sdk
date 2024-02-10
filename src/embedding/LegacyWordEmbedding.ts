@@ -99,7 +99,7 @@ export class LegacyWordEmbedding implements Embedding {
     return output;
   }
 
-  public embed(text: string): MultidimensionalVector {
+  #vectorizeText(text: string): MultidimensionalVector {
     const words = this.#tokenize(text);
     const bytes = this.#mapWords(words);
 
@@ -131,6 +131,10 @@ export class LegacyWordEmbedding implements Embedding {
 
     vector.freeze();
     return vector;
+  }
+
+  public embed(text: string): MultidimensionalVector {
+    return this.#vectorizeText(text);
   }
 }
 

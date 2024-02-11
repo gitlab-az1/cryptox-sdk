@@ -3,7 +3,7 @@ import {
 } from './async';
 
 
-describe('core/common/async', () => {
+describe('_internal/resources/async', () => {
   test('it should be ok', () => {
     expect(25 ** (1/2)).toBe(5);
   });

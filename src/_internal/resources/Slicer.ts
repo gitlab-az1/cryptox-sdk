@@ -2,8 +2,8 @@ import math from 'typesdk/math';
 import { Hash } from 'typesdk/crypto';
 import { Exception } from 'typesdk/errors';
 
-import ValidationError from '../errors/ValidationError';
-import InvalidSignatureError from '../errors/InvalidSignatureError';
+import ValidationError from '../../errors/ValidationError';
+import InvalidSignatureError from '../../errors/InvalidSignatureError';
 
 
 export type Chunk = {

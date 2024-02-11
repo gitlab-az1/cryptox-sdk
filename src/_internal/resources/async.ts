@@ -1,4 +1,4 @@
-import CanceledError from '../errors/CanceledError';
+import CanceledError from '../../errors/CanceledError';
 
 
 

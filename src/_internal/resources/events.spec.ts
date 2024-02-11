@@ -1,7 +1,7 @@
 import { EventEmitter } from './events';
 
 
-describe('core/common/events', () => {
+describe('_internal/resources/events', () => {
   test('it should be ok', () => {
     expect(25 ** (1/2)).toBe(5);
   });

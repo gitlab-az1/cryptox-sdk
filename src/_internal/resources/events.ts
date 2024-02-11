@@ -3,7 +3,7 @@ import { Crypto, Hash } from 'typesdk/crypto';
 import type { Dict, Writable } from 'typesdk/types';
 import { assertString } from 'typesdk/utils/assertions';
 
-import Disposable from '../domain/Disposable';
+import Disposable from '../../domain/Disposable';
 
 
 const logger = console;

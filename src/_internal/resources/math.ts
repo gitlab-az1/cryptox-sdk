@@ -1,6 +1,6 @@
 import math from 'typesdk/math';
 
-import { MultidimensionalVector } from '../embedding/vectors';
+import { MultidimensionalVector } from '../../embedding/vectors';
 
 
 /**

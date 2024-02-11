@@ -1,7 +1,7 @@
 import Lazy from './lazy';
 
 
-describe('core/common/lazy', () => {
+describe('_internal/resources/lazy', () => {
   test('it should be ok', () => {
     expect(25 ** (1/2)).toBe(5);
   });

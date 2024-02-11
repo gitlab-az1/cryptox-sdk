@@ -1,7 +1,7 @@
 import Slicer from './Slicer';
 
 
-describe('Lib::Slicer', () => {
+describe('_internal/resources/slicer', () => {
   test('should be ok', () => {
     expect(25 ** (1/2)).toBe(5);
   });

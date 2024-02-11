@@ -1,6 +1,6 @@
 {
   "name": "cryptx-sdk",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "main": "index.js",
   "repository": "https://github.com/gitlab-az1/cryptox-sdk.git",
   "author": "gitlab-az1 <gitlab.az1@gmail.com>",

@@ -6,7 +6,7 @@ import { assertString } from 'typesdk/utils/assertions';
 import { Embedding } from '../_internals/_config';
 import { Exception } from '../../errors/Exception';
 import { MultidimensionalVector } from '../vectors/multidimensional';
-import { calculateCosineSimilarityFromNumericArrays } from '../../resources/math';
+import { calculateCosineSimilarityFromNumericArrays } from '../../_internal/resources/math';
 import { LegacyWordEmbedding, type LegacyWordEmbeddingOptions } from '../LegacyWordEmbedding';
 
 

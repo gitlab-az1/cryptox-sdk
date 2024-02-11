@@ -1,5 +1,8 @@
 import math from 'typesdk/math';
 
+import { hmac } from './hash';
+import { isBrowser } from './_internal/utils';
+
 
 /**
  * Generates cryptographically secure random values into the provided Uint8Array.
@@ -268,4 +271,67 @@ export function base32Decode(encoded: string): Uint8Array {
   }
 
   return buffer;
+}
+
+
+/**
+ * Performs a binary comparison between two Uint8Arrays.
+ * 
+ * @param a - The first Uint8Array to compare.
+ * @param b - The second Uint8Array to compare.
+ * @returns {boolean} - True if the arrays are equal, false otherwise.
+ */
+export function binaryCompare(a: Uint8Array, b: Uint8Array): boolean {
+  if(a.length !== b.length) return false;
+    
+  let result = 0;
+    
+  for(let i = 0; i < a.length; i++) {
+    result |= a[i] ^ b[i];
+  }
+    
+  return result === 0;
+}
+
+
+/**
+ * Performs a deep comparison between two Uint8Arrays using HMAC.
+ * 
+ * @param a - The first Uint8Array to compare.
+ * @param b - The second Uint8Array to compare.
+ * @returns {Promise<boolean>} - A promise resolving to true if the arrays are equal, false otherwise.
+ */
+export async function deepCompare(a: Uint8Array, b: Uint8Array): Promise<boolean> {
+  const key = await randomBytes(32);
+
+  const mac1 = await hmac(a, key, 'sha256');
+  const mac2 = await hmac(b, key, 'sha256');
+
+  if(mac1.byteLength !== mac2.byteLength) return false;
+
+  const arr1 = new Uint8Array(mac1);
+  const arr2 = new Uint8Array(mac2);
+
+  for(let i = 0; i < arr2.length; i++) {
+    if(arr1[i] !== arr2[i]) return false;
+  }
+
+  return true;
+}
+
+
+/**
+ * Generates cryptographically secure random bytes.
+ * 
+ * @param length - The number of random bytes to generate.
+ * @returns {Promise<Uint8Array>} - A promise resolving to a Uint8Array containing the random bytes.
+ */
+export function randomBytes(length: number): Promise<Uint8Array> {
+  const _nodeRandom = async (len: number): Promise<Uint8Array> => {
+    const { randomBytes: r } = await import('crypto');
+    return r(len);
+  };
+
+  if(!isBrowser()) return _nodeRandom(length);
+  return Promise.resolve(getRandomValues(new Uint8Array(length)));
 }

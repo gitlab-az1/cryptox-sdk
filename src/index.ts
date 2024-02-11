@@ -5,6 +5,7 @@ export * from './hash';
 export * from './core';
 export * from './errors';
 export * from './embedding';
+export * from './symmetric';
 
 
 
@@ -12,6 +13,7 @@ export * from './embedding';
 namespace cryptox { /* eslint-disable @typescript-eslint/no-var-requires */
   export const embedding: typeof import('./embedding').embedding = require('./embedding').embedding;
   export const errors: typeof import('./errors').errors = require('./errors').errors;
+  export const symmetric: typeof import('./symmetric').symmetric = require('./symmetric').symmetric;
 
   /**
    * Namespace for PBKDF2 and Argon2 key derivation functions.

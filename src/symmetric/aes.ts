@@ -77,8 +77,8 @@ async function _aesDecryptIV(algorithm: SupportedAESVariants, data: Uint8Array, 
 
         hmac(XBuffer.fromString(payload).buffer, key.subarray(0, 8), 'sha512').then(sign => {
           const hexSignature = XBuffer.fromUint8Array(sign).toString('hex');
-
           if(hexSignature !== signature) return reject(new Error('Invalid HMAC signature. The data has been tampered with.'));
+          
           resolve([
             XBuffer.fromUint8Array(sign),
             XBuffer.fromString(payload),

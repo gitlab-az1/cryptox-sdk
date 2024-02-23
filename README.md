@@ -23,3 +23,5 @@
 - **Random Value Generation**: Generates random values.
 
 - **Integer to Byte Array Conversion**: Converts an integer to a byte array.
+
+- **XBuffer**: A polyfill for the `Buffer` class that works in both nodejs and browser contexts.

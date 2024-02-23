@@ -6,7 +6,7 @@ import SymmetricKey from './SymmetricKey';
 import { isBrowser } from '../_internal/utils';
 import AES, { SupportedAESVariants } from './aes';
 import Slicer from '../_internal/resources/Slicer';
-import XBuffer from '../_internal/resources/buffer';
+import XBuffer from '../buffer';
 import { Decrypted, LegacyCipher, SymmetricAlgorithm } from './core';
 
 

@@ -2,7 +2,7 @@ import math from 'typesdk/math';
 import { Exception } from 'typesdk/errors';
 import { isPlainObject } from 'typesdk/utils/is';
 
-import Lazy from './lazy';
+import Lazy from './_internal/resources/lazy';
 
 
 const hasNativeBufferSupport = typeof Buffer !== 'undefined';

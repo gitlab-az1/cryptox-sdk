@@ -4,7 +4,7 @@ import { hmac } from '../hash';
 import { Exception } from '../errors';
 import SymmetricKey from './SymmetricKey';
 import { isBrowser } from '../_internal/utils';
-import XBuffer from '../_internal/resources/buffer';
+import XBuffer from '../buffer';
 import { type Decrypted, LegacyCipher } from './core';
 
 

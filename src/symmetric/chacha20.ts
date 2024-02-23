@@ -5,7 +5,7 @@ import { Exception } from '../errors';
 import SymmetricKey from './SymmetricKey';
 import { isBrowser } from '../_internal/utils';
 import { Decrypted, LegacyCipher } from './core';
-import XBuffer from '../_internal/resources/buffer';
+import XBuffer from '../buffer';
 
 
 export class ChaCha20 implements LegacyCipher {

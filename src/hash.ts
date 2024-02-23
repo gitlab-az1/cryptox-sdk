@@ -1,4 +1,4 @@
-import XBuffer from './_internal/resources/buffer';
+import XBuffer from './buffer';
 
 import {
   isBrowser,

@@ -1,5 +1,5 @@
 import SymmetricKey from './SymmetricKey';
-import XBuffer from '../_internal/resources/buffer';
+import XBuffer from '../buffer';
 
 
 export const enum Algorithm {

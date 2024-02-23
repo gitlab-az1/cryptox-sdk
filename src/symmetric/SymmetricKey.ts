@@ -1,7 +1,7 @@
 import type { Dict } from 'typesdk/types';
 
 import { Exception } from '../errors';
-import XBuffer from '../_internal/resources/buffer';
+import XBuffer from '../buffer';
 import { Algorithm, type SymmetricAlgorithm, parseAlgorithmToEnum } from './core';
 
 

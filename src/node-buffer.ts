@@ -1,3 +1,6 @@
+import { isBrowser } from "./_internal/utils";
+
+
 /**
  * Masks a buffer using the given mask.
  *
@@ -49,7 +52,7 @@ export function toArrayBuffer(buf: Buffer): ArrayBuffer {
  */
 export function mask(source: Buffer, mask: Buffer, output: Buffer, offset: number, length: number): void {
   // eslint-disable-next-line no-extra-boolean-cast
-  if(!!process.env.CLIB_NO_BUFFER_UTIL) return _mask(source, mask, output, offset, length);
+  if(!!process.env.CLIB_NO_BUFFER_UTIL || isBrowser()) return _mask(source, mask, output, offset, length);
   if(length < 48) return _mask(source, mask, output, offset, length);
 
   try {
@@ -70,7 +73,7 @@ export function mask(source: Buffer, mask: Buffer, output: Buffer, offset: numbe
  */
 export function unmask(buffer: Buffer, mask: Buffer): void {
   // eslint-disable-next-line no-extra-boolean-cast
-  if(!!process.env.CLIB_NO_BUFFER_UTIL) return _unmask(buffer, mask);
+  if(!!process.env.CLIB_NO_BUFFER_UTIL || isBrowser()) return _unmask(buffer, mask);
   if(buffer.length < 32) return _unmask(buffer, mask);
 
   try {
